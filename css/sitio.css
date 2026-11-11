@@ -1,0 +1,248 @@
+/* ModuleX Dock — "Todo se une en una X".
+   Paleta del BRAND-CONTRACT (PRD §3): azul del logo, tinta, café de la cruz, concreto,
+   agua y laguna profunda. Sin JS o con movimiento reducido el sitio se lee completo:
+   los pins, la saga y la cortina solo existen bajo html.mov. */
+:root{
+  --azul:#0095DA; --tinta:#0B1014; --cafe:#645B57; --concreto:#E6E4D9; --agua:#98DFEA; --laguna:#315B4E;
+  --bg:var(--tinta); --fg:var(--concreto); --acento:var(--agua);
+  --ease:cubic-bezier(.16,.8,.3,1);
+  --gut:clamp(16px,4vw,56px);
+  --sans:'Archivo',sans-serif; --mono:'IBM Plex Mono',monospace;
+}
+*,*::before,*::after{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
+@media (prefers-reduced-motion:no-preference){html{scroll-behavior:smooth}}
+body{margin:0;background:var(--bg);color:var(--fg);font:400 1.0625rem/1.6 var(--sans);transition:background-color .28s var(--ease),color .28s var(--ease);overflow-x:clip}
+img,video,svg{display:block;max-width:100%}
+img{height:auto}
+a{color:inherit}
+h1,h2,h3{margin:0;font-weight:800;font-stretch:112%;line-height:.94;letter-spacing:-.022em;text-wrap:balance}
+h1{font-size:clamp(2.1rem,9vw,6.4rem);font-stretch:118%}
+h2{font-size:clamp(2rem,6.2vw,4.8rem)}
+h3{font-size:clamp(1.5rem,3vw,2.3rem);font-stretch:108%}
+p{margin:0 0 1em;max-width:62ch;text-wrap:pretty}
+em{font-style:normal;color:var(--azul)}
+::selection{background:var(--azul);color:var(--tinta)}
+:focus-visible{outline:3px solid var(--azul);outline-offset:3px;border-radius:6px}
+.kicker,.num,.tag,.pie,.cota,.nota,.hint,figcaption,dt,.foco-ctl,.rail span{font-family:var(--mono);font-size:.78rem;letter-spacing:.08em;text-transform:uppercase}
+.kicker{color:var(--acento);margin-bottom:1.1em}
+.nota{font-size:.72rem;opacity:.72;text-transform:none;letter-spacing:.02em}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
+.salta{position:fixed;left:12px;top:-60px;z-index:100;background:var(--azul);color:var(--tinta);padding:12px 16px;border-radius:10px;font-weight:700}
+.salta:focus{top:12px}
+
+/* ---------- temas sin JS: cada sección pinta su propia paleta ---------- */
+html:not(.js) [data-tema=concreto]{--bg:var(--concreto);--fg:var(--tinta);--acento:var(--laguna)}
+html:not(.js) [data-tema=laguna]{--bg:var(--laguna);--fg:var(--concreto);--acento:var(--agua)}
+html:not(.js) [data-tema]{background:var(--bg);color:var(--fg)}
+
+/* ---------- botones (magnetic los mueve con --tx/--ty) ---------- */
+.btn{--s:1;display:inline-flex;align-items:center;justify-content:center;gap:.5em;min-height:48px;padding:0 1.5em;border-radius:999px;border:1.5px solid var(--azul);background:var(--azul);color:var(--tinta);font:700 .95rem/1 var(--sans);font-stretch:112%;letter-spacing:.01em;text-decoration:none;cursor:pointer;transform:translate3d(var(--tx,0),var(--ty,0),0) scale(var(--s));transition:transform .22s var(--ease),background-color .2s var(--ease),color .2s var(--ease),border-color .2s var(--ease)}
+.btn:active{--s:.97}
+.btn-ghost{background:transparent;color:var(--fg);border-color:currentColor}
+.btn-sm{min-height:44px;padding:0 1.15em;font-size:.85rem}
+@media (hover:hover) and (pointer:fine){
+  .btn:hover{background:var(--concreto);border-color:var(--concreto);color:var(--tinta)}
+  .btn-ghost:hover{background:var(--fg);border-color:var(--fg);color:var(--bg)}
+  .menu a:hover{color:var(--azul)}
+  .rail a:hover span{opacity:1;transform:none}
+  .obra:hover img{transform:scale(1.035)}
+}
+
+/* ---------- cabecera, rail de capítulos, barra de progreso ---------- */
+.top{position:fixed;inset:0 0 auto;z-index:60;display:flex;align-items:center;justify-content:space-between;gap:24px;height:64px;padding:0 var(--gut);color:var(--fg);background:color-mix(in srgb,var(--bg) 74%,transparent);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px)}
+.marca{font:800 1.15rem/1 var(--sans);font-stretch:125%;letter-spacing:.03em;text-decoration:none;white-space:nowrap}
+.marca b{color:var(--azul);display:inline-block;font-weight:900}
+.marca span{font-weight:500;font-stretch:100%;font-size:.7em;letter-spacing:.24em;opacity:.75}
+.menu{display:none;gap:28px;font:500 .82rem/1 var(--mono);text-transform:uppercase;letter-spacing:.08em}
+.menu a{text-decoration:none;padding:14px 0;transition:color .2s var(--ease)}
+@media (min-width:900px){.menu{display:flex}}
+.barra{position:fixed;inset:0 0 auto;height:3px;z-index:70;background:var(--azul);transform-origin:0 50%;transform:scaleX(0)}
+.rail{display:none}
+@media (min-width:1100px){
+  .rail{display:block;position:fixed;right:18px;top:50%;z-index:55;transform:translateY(-50%)}
+  .rail ol{list-style:none;margin:0;padding:0;display:grid;gap:4px}
+  .rail a{display:flex;align-items:center;justify-content:flex-end;gap:12px;min-height:30px;text-decoration:none;color:var(--fg)}
+  .rail span{font-size:.66rem;opacity:0;transform:translateX(6px);transition:opacity .2s var(--ease),transform .2s var(--ease)}
+  .rail i{position:relative;width:14px;height:14px;opacity:.45;transition:opacity .2s var(--ease),transform .25s var(--ease)}
+  .rail i::before,.rail i::after{content:"";position:absolute;left:50%;top:50%;width:14px;height:2.5px;margin:-1.25px 0 0 -7px;border-radius:2px;background:currentColor;transform:rotate(45deg)}
+  .rail i::after{transform:rotate(-45deg)}
+  .rail a[aria-current] i{opacity:1;color:var(--azul);transform:scale(1.25)}
+  .rail a[aria-current] span{opacity:1;transform:none}
+}
+
+/* ---------- cursor: una X que sigue al puntero (solo puntero fino) ---------- */
+.cursor{display:none}
+html.fino.mov .cursor{display:block;position:fixed;left:0;top:0;z-index:95;width:30px;height:30px;margin:-15px 0 0 -15px;pointer-events:none;opacity:0;color:var(--azul);transition:opacity .2s var(--ease)}
+html.fino.mov .cursor.vivo{opacity:1}
+.cursor::before,.cursor::after{content:"";position:absolute;left:0;top:50%;width:100%;height:3px;margin-top:-1.5px;border-radius:3px;background:currentColor;transform:rotate(45deg)}
+.cursor::after{transform:rotate(-45deg)}
+
+/* ---------- pins: solo con movimiento; la posición sticky la pone el JS ---------- */
+.stage{position:relative}
+html.mov .pin{height:var(--h)}
+html.mov .pin>.stage{height:100vh;height:100svh;overflow:hidden}
+.sec-head{position:relative;z-index:2}
+.pie{opacity:.7;text-transform:none;letter-spacing:.02em;font-size:.72rem;max-width:none}
+
+/* ---------- 01 HERO ---------- */
+.hero .stage{min-height:100vh;min-height:100svh;display:grid;align-items:end;padding:96px var(--gut) clamp(28px,6svh,72px)}
+.hero-vid{position:absolute;inset:0;transform-origin:50% 50%}
+.hero-vid video{width:100%;height:100%;object-fit:cover}
+.hero-vid::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(11,16,20,.5),rgba(11,16,20,.15) 38%,rgba(11,16,20,.86))}
+html.mov .hero-vid{-webkit-mask:url(../img/x.svg) 50% 50%/var(--xs,600vmax) var(--xs,600vmax) no-repeat;mask:url(../img/x.svg) 50% 50%/var(--xs,600vmax) var(--xs,600vmax) no-repeat}
+html.mov .hero-vid.abierto{-webkit-mask:none;mask:none}
+.hero-copy{position:relative;z-index:2;max-width:min(980px,100%);color:var(--concreto)}
+.hero-copy .kicker{color:var(--agua)}
+.lead{font-size:clamp(1.05rem,1.6vw,1.3rem);line-height:1.5;margin:1.1em 0 1.6em;max-width:48ch}
+.ctas,.vias,.form-btns{display:flex;flex-wrap:wrap;gap:12px}
+.hero .tag{position:absolute;z-index:2;right:var(--gut);top:84px;margin:0;color:var(--concreto);opacity:.8;font-size:.68rem}
+@media (max-width:640px){
+  .hero .stage{padding-bottom:max(92px,env(safe-area-inset-bottom))}
+  .ctas{flex-direction:column;align-items:stretch;max-width:420px}
+  .lead{margin:.8em 0 1.2em}
+  .hero .tag{top:auto;bottom:calc(100% - 92px);left:var(--gut);right:auto}
+}
+
+/* ---------- 02 PIEZAS: la saga ---------- */
+.saga .stage{padding:96px var(--gut) 28px}
+.caps{display:grid;gap:72px;margin:40px 0 28px}
+.cap{display:grid;gap:20px 48px;align-items:center}
+.cap figure{margin:0;border-radius:20px;overflow:hidden;aspect-ratio:4/3;background:var(--cafe)}
+.cap figure img{width:100%;height:100%;object-fit:cover}
+.cap-txt{max-width:46ch}
+.cap h3{margin:.35em 0 .5em}
+.num{color:var(--acento)}
+.cota{display:inline-block;margin-top:.4em;padding:8px 12px;border:1px solid currentColor;border-radius:999px;font-size:.72rem}
+@media (min-width:900px){.cap{grid-template-columns:1.3fr 1fr}}
+html.mov .saga .stage{display:grid;grid-template-rows:auto 1fr auto}
+html.mov .caps{position:relative;margin:12px 0;perspective:1600px;perspective-origin:50% 40%}
+html.mov .cap{position:absolute;inset:0;align-content:center;will-change:transform,opacity;backface-visibility:hidden}
+html.mov .cap figure{max-height:58svh}
+@media (max-width:899px){
+  html.mov .cap{gap:14px;align-content:start}
+  html.mov .cap figure{max-height:36svh}
+  html.mov .cap p{font-size:.95rem;margin-bottom:.5em}
+}
+
+/* ---------- 03 CONFIGURA: módulos que se unen, cruz que se abre al agua ---------- */
+.malla .stage{padding:96px var(--gut) 40px}
+.malla-txt{max-width:560px}
+.pasos{list-style:none;margin:24px 0 0;padding:0;display:grid;gap:8px;font:500 .8rem/1.2 var(--mono);text-transform:uppercase;letter-spacing:.08em}
+.pasos li{display:flex;align-items:center;gap:10px;opacity:.4;transition:opacity .25s var(--ease)}
+.pasos li::before{content:"";width:10px;height:10px;border-radius:2px;background:currentColor;transform:rotate(45deg) scale(.6);transition:transform .25s var(--ease)}
+.pasos li.on{opacity:1;color:var(--laguna)}
+.pasos li.on::before{transform:rotate(45deg)}
+.grid{display:none}
+.laguna{position:relative;margin-top:40px;border-radius:20px;overflow:hidden;aspect-ratio:16/9;background:var(--laguna)}
+.laguna video{width:100%;height:100%;object-fit:cover}
+.laguna .tag{position:absolute;left:16px;bottom:12px;margin:0;color:var(--concreto);font-size:.66rem;text-shadow:0 1px 8px rgba(11,16,20,.6)}
+html.mov .malla .stage{display:grid;align-items:center;gap:32px}
+html.mov .malla .laguna{position:absolute;inset:0;margin:0;border-radius:0;aspect-ratio:auto;z-index:3;opacity:0;-webkit-mask:url(../img/cruz.svg) var(--mpx,0) var(--mpy,0)/var(--cs,0px) var(--cs,0px) no-repeat;mask:url(../img/cruz.svg) var(--mpx,0) var(--mpy,0)/var(--cs,0px) var(--cs,0px) no-repeat}
+html.mov .malla .grid{display:grid;position:relative;z-index:2;grid-template-columns:repeat(8,1fr);gap:3px;width:min(68svh,44vw);aspect-ratio:1;justify-self:end}
+.celda{border-radius:16%;background:color-mix(in srgb,var(--tinta) 16%,var(--concreto));box-shadow:inset 0 0 0 1px rgba(11,16,20,.14),inset 0 -6px 10px rgba(11,16,20,.08);will-change:transform,opacity}
+.celda.c{background:color-mix(in srgb,var(--tinta) 24%,var(--concreto))}
+.nudo{position:absolute;width:5.2%;aspect-ratio:1;margin:-2.6% 0 0 -2.6%;opacity:0;will-change:transform,opacity}
+.nudo::before,.nudo::after{content:"";position:absolute;left:0;top:50%;width:100%;height:34%;margin-top:-17%;border-radius:40%;background:var(--cafe);transform:rotate(45deg)}
+.nudo::after{transform:rotate(-45deg)}
+@media (min-width:900px){html.mov .malla .stage{grid-template-columns:minmax(0,1fr) minmax(0,.9fr)}html.mov .malla-txt h2{font-size:clamp(2rem,4.3vw,4.2rem)}}
+@media (max-width:899px){
+  html.mov .malla .stage{align-content:start;gap:18px}
+  html.mov .malla .grid{width:min(86vw,48svh);justify-self:center}
+  html.mov .malla-txt p{font-size:.95rem}
+  html.mov .pasos{display:flex;flex-wrap:wrap;gap:6px 14px;margin-top:12px}
+}
+
+/* ---------- 04 SE ARMA: el foco revela el muelle terminado ---------- */
+.arma{display:grid;gap:28px 56px;align-items:center;padding:clamp(88px,12vw,160px) var(--gut)}
+.hint{color:var(--acento);text-transform:none;letter-spacing:.02em;font-size:.8rem}
+.si-fino{display:none}
+html.fino .si-fino{display:inline}
+html.fino .no-fino{display:none}
+.foco{margin:0;display:grid;position:relative;touch-action:pan-y;-webkit-user-select:none;user-select:none}
+.foco img{grid-area:1/1;width:100%;aspect-ratio:4/3;object-fit:cover;border-radius:20px;pointer-events:none}
+.foco figcaption{grid-area:2/1;margin-top:12px;opacity:.7;text-transform:none;letter-spacing:.02em;font-size:.72rem}
+.foco-agua{-webkit-mask-image:radial-gradient(circle var(--r,0px) at var(--mx,50%) var(--my,50%),#000 96%,transparent 100%),linear-gradient(90deg,#000 calc(var(--b,50%) - .6%),transparent calc(var(--b,50%) + .6%));mask-image:radial-gradient(circle var(--r,0px) at var(--mx,50%) var(--my,50%),#000 96%,transparent 100%),linear-gradient(90deg,#000 calc(var(--b,50%) - .6%),transparent calc(var(--b,50%) + .6%))}
+html.fino .foco{cursor:none}
+.foco-ctl{display:flex;align-items:center;gap:14px;grid-column:1/-1;font-size:.7rem}
+.foco-ctl input{flex:1;min-width:0;height:44px;accent-color:var(--azul);cursor:pointer}
+@media (min-width:900px){.arma{grid-template-columns:minmax(0,.85fr) minmax(0,1.15fr)}.foco-ctl{grid-column:2}}
+
+/* ---------- 05 OBRAS: puertas en X + galería horizontal ---------- */
+.obras .stage{padding:96px 0 28px}
+.obras .sec-head,.obras .pie{padding:0 var(--gut)}
+.pista{display:flex;gap:20px;padding:32px var(--gut);overflow-x:auto;scroll-snap-type:x mandatory;scroll-padding:0 var(--gut);outline-offset:-3px}
+.obra{flex:none;margin:0;position:relative;height:min(56svh,520px);border-radius:18px;overflow:hidden;scroll-snap-align:start;background:var(--tinta)}
+.obra img{height:100%;width:auto;max-width:none;transition:transform .3s var(--ease)}
+.obra figcaption{position:absolute;left:0;right:0;bottom:0;display:flex;justify-content:space-between;align-items:baseline;gap:12px;padding:40px 18px 14px;background:linear-gradient(transparent,rgba(11,16,20,.8));color:var(--concreto)}
+.obra b{font:800 1.35rem/1 var(--sans);font-stretch:118%;text-transform:none;letter-spacing:-.01em}
+.obra-cta{width:min(78vw,360px);display:flex;flex-direction:column;justify-content:flex-end;gap:18px;padding:28px;background:var(--agua);color:var(--tinta)}
+.obra-cta p{font:700 1.5rem/1.1 var(--sans);font-stretch:112%}
+.obra-cta .btn{background:var(--tinta);border-color:var(--tinta);color:var(--concreto);align-self:flex-start}
+.cortina{display:none}
+html.mov .obras .stage{display:grid;grid-template-rows:auto 1fr auto;align-items:center}
+html.mov .pista{overflow:visible;will-change:transform;scroll-snap-type:none}
+html.mov .cortina{display:block;position:absolute;inset:0;z-index:20;pointer-events:none}
+.cortina i{position:absolute;inset:-2px;background:var(--tinta);will-change:transform}
+.cortina i:nth-child(1){clip-path:polygon(0 0,100% 0,50% 50%)}
+.cortina i:nth-child(2){clip-path:polygon(100% 0,100% 100%,50% 50%)}
+.cortina i:nth-child(3){clip-path:polygon(0 100%,100% 100%,50% 50%)}
+.cortina i:nth-child(4){clip-path:polygon(0 0,0 100%,50% 50%)}
+.cortina::after{content:"";position:absolute;inset:0;opacity:var(--costura,1);background:linear-gradient(to top right,transparent calc(50% - 1.5px),var(--azul) 50%,transparent calc(50% + 1.5px)),linear-gradient(to bottom right,transparent calc(50% - 1.5px),var(--azul) 50%,transparent calc(50% + 1.5px))}
+
+/* ---------- 06 FICHA: tres profundidades + manifiesto letra por letra ---------- */
+.capas{position:relative;min-height:115vh;min-height:115svh;display:grid;place-items:center;overflow:hidden;padding:120px var(--gut);background:var(--tinta);color:var(--concreto)}
+.capa-foto{position:absolute;left:0;top:-14%;width:100%;height:128%;max-width:none;object-fit:cover;will-change:transform}
+.capas::after{content:"";position:absolute;inset:0;background:radial-gradient(ellipse at 50% 55%,rgba(11,16,20,.62),rgba(11,16,20,.3) 70%),linear-gradient(rgba(11,16,20,.35),rgba(11,16,20,.55))}
+.capa-x{position:absolute;z-index:1;width:min(78vmin,760px);color:var(--agua);opacity:.55;will-change:transform}
+.capa-txt{position:absolute;z-index:2;left:var(--gut);bottom:32px;margin:0;font:500 .78rem/1 var(--mono);letter-spacing:.1em;text-transform:uppercase;will-change:transform}
+.capa-txt span{color:var(--agua)}
+.manifiesto{position:relative;z-index:2;margin:0;max-width:15ch;text-align:center;font:800 clamp(2.1rem,6.4vw,5.6rem)/1 var(--sans);font-stretch:112%;letter-spacing:-.025em;text-wrap:balance}
+.manifiesto .l{transition:opacity .12s linear}
+.ficha-cuerpo{padding:clamp(88px,12vw,160px) var(--gut)}
+.tabla{margin:48px 0 0;display:grid;gap:0 48px}
+.tabla div{display:grid;gap:6px 24px;padding:18px 0;border-top:1px solid color-mix(in srgb,var(--fg) 22%,transparent)}
+.tabla dt{color:var(--acento);font-size:.72rem}
+.tabla dd{margin:0;font-size:1.05rem;line-height:1.45}
+@media (min-width:760px){.tabla div{grid-template-columns:minmax(150px,.7fr) 1.3fr}}
+@media (min-width:1100px){.tabla{grid-template-columns:1fr 1fr}}
+
+/* ---------- 07 COTIZA ---------- */
+.cotiza{display:grid;gap:48px 64px;padding:clamp(88px,12vw,160px) var(--gut)}
+.cot-txt>p{font-size:1.1rem}
+.vias{margin:28px 0}
+address{font-style:normal;font-size:.95rem;opacity:.85;line-height:1.7}
+.form{display:grid;gap:18px;align-content:start;padding:clamp(22px,3vw,36px);border-radius:24px;background:color-mix(in srgb,var(--concreto) 7%,var(--tinta));box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--concreto) 14%,transparent)}
+.form label{display:grid;gap:8px;font:500 .78rem/1.2 var(--mono);text-transform:uppercase;letter-spacing:.08em}
+.form small{text-transform:none;opacity:.7}
+.form input{min-height:52px;padding:0 16px;border-radius:14px;border:1.5px solid color-mix(in srgb,var(--concreto) 26%,transparent);background:var(--tinta);color:var(--concreto);font:400 1rem/1 var(--sans);transition:border-color .2s var(--ease)}
+.form input::placeholder{color:color-mix(in srgb,var(--concreto) 45%,transparent)}
+.form input:focus{outline:none;border-color:var(--azul)}
+.form input[aria-invalid=true]{border-color:var(--agua)}
+.aviso{margin:0;min-height:1.4em;color:var(--agua);font-size:.9rem}
+@media (min-width:900px){.cotiza{grid-template-columns:1fr 1fr;align-items:start}}
+
+/* ---------- footer y barra fija móvil ---------- */
+.pie-sitio{padding:56px var(--gut) 120px;background:var(--tinta);color:var(--concreto);display:grid;gap:10px;font-size:.9rem;border-top:1px solid color-mix(in srgb,var(--concreto) 12%,transparent)}
+.pie-sitio p{margin:0}
+.pie-sitio .marca{font-size:1.6rem;margin-bottom:8px}
+.pie-sitio a{text-underline-offset:3px}
+.fab{position:fixed;left:12px;right:12px;bottom:max(12px,env(safe-area-inset-bottom));z-index:58;display:flex;align-items:center;justify-content:center;min-height:52px;border-radius:999px;background:var(--azul);color:var(--tinta);font:800 1rem/1 var(--sans);font-stretch:112%;text-decoration:none;box-shadow:0 10px 30px rgba(11,16,20,.35);transition:transform .25s var(--ease),opacity .25s var(--ease)}
+.fab.fuera{transform:translateY(140%);opacity:0;pointer-events:none}
+@media (min-width:600px){.fab{left:auto;right:24px;padding:0 30px}}
+@media (min-width:600px) and (max-width:899px){html.mov .cap{align-content:center;gap:22px}html.mov .cap figure{max-height:48svh}html.mov .cap p{font-size:1.05rem}}
+@media (min-width:900px){.fab{display:none}.pie-sitio{padding-bottom:56px}}
+
+/* ---------- revelados ---------- */
+html.mov .rv{opacity:0;transform:translate3d(0,28px,0);transition:opacity .6s var(--ease),transform .6s var(--ease)}
+html.mov .rv.on{opacity:1;transform:none}
+
+/* movimiento reducido: se atenúa, no se apaga — opacidad y color se quedan */
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{transition-duration:.01ms!important;animation-duration:.01ms!important}
+  .rv,.manifiesto .l{opacity:1!important;transform:none!important}
+}
+.resena-pide{margin-top:32px;padding:22px 24px;border-radius:18px;border:1px dashed color-mix(in srgb,var(--fg) 35%,transparent)}
+.resena-pide h3{font-size:1.25rem;margin-bottom:.5em}
+.resena-pide p{font-size:.95rem;opacity:.85}
+.resena-pide a{display:inline-flex;align-items:center;min-height:44px;color:var(--acento);font-weight:700;text-underline-offset:3px}
