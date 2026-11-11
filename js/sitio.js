@@ -139,9 +139,14 @@ if (mov) {
     const ang = rnd() * Math.PI * 2, dist = 160 + rnd() * 360;
     celdas.push({ el, cruz, dx: Math.cos(ang) * dist, dy: Math.sin(ang) * dist, rot: (rnd() - .5) * 80, del: rnd() * .35 });
   }
-  for (let i = 1; i < 8; i++) for (let j = 1; j < 8; j++) if (i === 4 || j === 4) {
-    const n = D.createElement('b'); n.className = 'nudo'; n.style.left = j * 12.5 + '%'; n.style.top = i * 12.5 + '%';
-    grid.append(n); nudos.push({ el: n, d: (Math.abs(i - 4) + Math.abs(j - 4)) / 6 });
+  /* Los módulos se unen por el CENTRO de cada lado compartido (ahí va la X), nunca por las esquinas */
+  const ok = (r, c) => r === 3 || r === 4 || c === 3 || c === 4, put = (x, y) => {
+    const n = D.createElement('b'); n.className = 'nudo'; n.style.left = x + '%'; n.style.top = y + '%';
+    grid.append(n); nudos.push({ el: n, d: (Math.abs(x - 50) + Math.abs(y - 50)) / 44 });
+  };
+  for (let r = 0; r < 8; r++) for (let c = 0; c < 8; c++) if (ok(r, c)) {
+    if (c < 7 && ok(r, c + 1)) put((c + 1) * 12.5, (r + .5) * 12.5);
+    if (r < 7 && ok(r + 1, c)) put((c + .5) * 12.5, (r + 1) * 12.5);
   }
 }
 function fMalla() {
